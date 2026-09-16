@@ -1,7 +1,13 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import { useRoute } from "vue-router";
+
+const route = useRoute();
 </script>
 
 <template>
-  <HelloWorld />
+  <header v-if="!route.meta.hideLayout">Header</header>
+  <main>
+    <RouterView />
+  </main>
+  <footer v-if="!route.meta.hideLayout">Footer</footer>
 </template>
