@@ -1,13 +1,23 @@
 import { createRouter, createWebHistory } from "vue-router";
-// TODO: Importar componentes de vista
+import Home from "../pages/Home.vue";
+import Login from "../pages/Login.vue";
+import Register from "../pages/Register.vue";
+import NotFound from "../pages/NotFound.vue";
 
 const routes = [
-  // TODO: Definir rutas
+  { path: "/", component: Home },
+  { path: "/login", component: Login },
+  { path: "/register", component: Register },
+  {
+    path: "/:pathMatch(.*)*",
+    component: NotFound,
+    meta: { hideLayout: true },
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 });
 
 export default router;
