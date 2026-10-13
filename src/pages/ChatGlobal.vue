@@ -1,6 +1,6 @@
 <script setup>
 import { nextTick, onMounted, onUnmounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { getCurrentUser } from "@/services/auth";
 import {
   getGlobalMessages,
@@ -159,13 +159,30 @@ onUnmounted(() => {
           </div>
           <div v-else class="space-y-5">
             <article v-for="message in messages" :key="message.id" class="flex items-start gap-3" :class="isOwnMessage(message) ? 'flex-row-reverse' : ''">
-              <div class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-400/20 bg-primary/20 text-xs font-semibold text-[#c5c6ff]">
+              <RouterLink
+                v-if="message.user_id"
+                :to="`/usuario/${message.user_id}`"
+                class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-400/20 bg-primary/20 text-xs font-semibold text-[#c5c6ff]"
+                :aria-label="`Ver perfil de ${getDisplayName(message)}`"
+              >
+                <img v-if="message.profiles?.avatar_url" class="size-full object-cover" :src="message.profiles.avatar_url" alt="" />
+                <span v-else>{{ getInitial(message) }}</span>
+              </RouterLink>
+              <div v-else class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-400/20 bg-primary/20 text-xs font-semibold text-[#c5c6ff]">
                 <img v-if="message.profiles?.avatar_url" class="size-full object-cover" :src="message.profiles.avatar_url" alt="" />
                 <span v-else>{{ getInitial(message) }}</span>
               </div>
               <div class="min-w-0 max-w-[82%]" :class="isOwnMessage(message) ? 'items-end text-right' : ''">
                 <div class="mb-1 flex items-center gap-2" :class="isOwnMessage(message) ? 'justify-end' : ''">
-                  <strong class="truncate text-xs font-semibold text-slate-200">{{ getDisplayName(message) }}</strong>
+                  <RouterLink
+                    v-if="message.user_id"
+                    :to="`/usuario/${message.user_id}`"
+                    class="truncate text-xs font-semibold text-slate-200"
+                    :aria-label="`Ver perfil de ${getDisplayName(message)}`"
+                  >
+                    <strong>{{ getDisplayName(message) }}</strong>
+                  </RouterLink>
+                  <strong v-else class="truncate text-xs font-semibold text-slate-200">{{ getDisplayName(message) }}</strong>
                   <time class="shrink-0 text-[10px] text-slate-500" :datetime="message.created_at">{{ formatTime(message.created_at) }}</time>
                 </div>
                 <p class="w-fit whitespace-pre-wrap rounded-[3px_12px_12px] border border-slate-400/10 bg-[#273449] px-3 py-2 text-xs leading-5 text-slate-300" :class="isOwnMessage(message) ? 'ml-auto rounded-[12px_3px_12px_12px] border-primary/20 bg-primary/20' : ''">
