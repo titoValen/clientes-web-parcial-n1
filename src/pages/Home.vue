@@ -71,7 +71,7 @@ const features = [
             <RouterLink
               v-if="isAuthReady && !user"
               class="inline-flex min-h-[52px] min-w-[174px] items-center justify-center gap-[19px] rounded-[9px] border border-transparent bg-primary px-[19px] text-[13px] font-semibold text-white no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_10px_30px_rgba(79,70,229,0.23)]"
-              to="/registarse"
+              to="/registrarse"
             >
               Empezar ahora <span aria-hidden="true">↗</span>
             </RouterLink>
@@ -280,7 +280,7 @@ const features = [
         <RouterLink
           v-if="isAuthReady && !user"
           class="relative z-[1] inline-flex min-h-[45px] w-fit items-center justify-center gap-4 rounded-[9px] border border-transparent bg-primary px-[17px] text-[13px] font-semibold text-white no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_10px_30px_rgba(79,70,229,0.23)]"
-          to="/registarse"
+          to="/registrarse"
         >
           Crear mi cuenta <span aria-hidden="true">↗</span>
         </RouterLink>
