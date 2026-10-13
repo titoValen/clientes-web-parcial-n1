@@ -5,6 +5,7 @@ import Register from "@/pages/Register.vue";
 import Perfil from "@/pages/Perfil.vue";
 import ChatGlobal from "@/pages/ChatGlobal.vue";
 import ChatIndividual from "@/pages/ChatIndividual.vue";
+import PublicProfile from "@/pages/PublicProfile.vue";
 import EmailConfirmation from "@/pages/EmailConfirmation.vue";
 import Error404 from "@/pages/Error404.vue";
 import { getSession } from "@/services/auth";
@@ -18,6 +19,7 @@ const routes = [
   { path: "/perfil", component: Perfil, meta: { requiresAuth: true } },
   { path: "/chat", component: ChatGlobal, meta: { requiresAuth: true } },
   { path: "/chat/:id", component: ChatIndividual, meta: { requiresAuth: true } },
+  { path: "/usuario/:id", component: PublicProfile },
   { path: "/:pathMatch", component: Error404 },
 ];
 
