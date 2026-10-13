@@ -29,7 +29,9 @@ const currentUser = ref(null);
 const isLoading = ref(true);
 const isSubmitting = ref(false);
 const errorMessage = ref("");
+const loadError = ref("");
 const successMessage = ref("");
+const deleteCandidate = ref(null);
 let postsChannel;
 
 function loadPosts() {
@@ -130,7 +132,18 @@ async function handleUpdate(post) {
 }
 
 async function handleDelete(post) {
-  if (isSubmitting.value || !window.confirm("¿Querés borrar esta publicación?")) return;
+  if (isSubmitting.value) return;
+
+  deleteCandidate.value = post;
+}
+
+function cancelDelete() {
+  deleteCandidate.value = null;
+}
+
+async function confirmDelete() {
+  const post = deleteCandidate.value;
+  if (!post || isSubmitting.value) return;
 
   errorMessage.value = "";
   successMessage.value = "";
@@ -139,6 +152,7 @@ async function handleDelete(post) {
   try {
     await deletePost(post.id);
     removePost(post.id);
+    deleteCandidate.value = null;
     successMessage.value = "Publicación eliminada correctamente.";
   } catch (error) {
     errorMessage.value = error?.message || "No pudimos borrar la publicación.";
@@ -148,6 +162,8 @@ async function handleDelete(post) {
 }
 
 async function loadFeed() {
+  loadError.value = "";
+
   try {
     currentUser.value = await getCurrentUser();
     await refreshPosts();
@@ -159,10 +175,15 @@ async function loadFeed() {
       }
     });
   } catch (error) {
-    errorMessage.value = error?.message || "No pudimos cargar las publicaciones.";
+    loadError.value = error?.message || "No pudimos cargar las publicaciones.";
   } finally {
     isLoading.value = false;
   }
+}
+
+async function retryLoad() {
+  isLoading.value = true;
+  await loadFeed();
 }
 
 onMounted(loadFeed);
@@ -195,6 +216,10 @@ onUnmounted(() => {
       </div>
     </form>
 
+    <div v-if="loadError" class="mt-4 flex flex-col gap-3 rounded-lg border border-danger/25 bg-danger/10 px-4 py-3 text-xs leading-5 text-red-200 sm:flex-row sm:items-center sm:justify-between" role="alert">
+      <span><strong>No pudimos cargar las publicaciones.</strong> {{ loadError }}</span>
+      <button class="min-h-9 rounded-lg border border-red-300/30 px-3 font-semibold text-red-100 hover:bg-red-300/10" type="button" @click="retryLoad">Reintentar</button>
+    </div>
     <p v-if="errorMessage" class="mt-4 rounded-lg border border-danger/25 bg-danger/10 px-4 py-3 text-xs leading-5 text-red-200" role="alert">
       {{ errorMessage }}
     </p>
@@ -235,6 +260,17 @@ onUnmounted(() => {
         </form>
         <p v-else class="mt-4 whitespace-pre-wrap text-sm leading-6 text-slate-300">{{ post.content }}</p>
       </article>
+    </div>
+
+    <div v-if="deleteCandidate" class="fixed inset-0 z-50 grid place-items-center bg-slate-950/75 px-4" @click.self="cancelDelete">
+      <section class="w-full max-w-md rounded-2xl border border-slate-400/20 bg-surface p-6 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="delete-post-title" aria-describedby="delete-post-description">
+        <h2 id="delete-post-title" class="font-heading text-lg font-semibold">¿Borrar publicación?</h2>
+        <p id="delete-post-description" class="mt-2 text-sm leading-6 text-muted">Esta acción no se puede deshacer.</p>
+        <div class="mt-6 flex justify-end gap-3">
+          <button class="min-h-10 rounded-lg border border-slate-400/25 px-4 text-xs font-semibold text-slate-300 hover:text-white" type="button" :disabled="isSubmitting" @click="cancelDelete">Cancelar</button>
+          <button class="min-h-10 rounded-lg bg-red-500 px-4 text-xs font-semibold text-white hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-60" type="button" :disabled="isSubmitting" @click="confirmDelete">{{ isSubmitting ? "Borrando..." : "Sí, borrar" }}</button>
+        </div>
+      </section>
     </div>
   </section>
 </template>
