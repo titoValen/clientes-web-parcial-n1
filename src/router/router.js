@@ -7,11 +7,13 @@ import ChatGlobal from "@/pages/ChatGlobal.vue";
 import ChatIndividual from "@/pages/ChatIndividual.vue";
 import EmailConfirmation from "@/pages/EmailConfirmation.vue";
 import Error404 from "@/pages/Error404.vue";
+import { getSession } from "@/services/auth";
 
 const routes = [
   { path: "/", component: Home },
-  { path: "/inicio-sesion", component: Login },
-  { path: "/registarse", component: Register },
+  { path: "/inicio-sesion", component: Login, meta: { guestOnly: true } },
+  { path: "/registarse", component: Register, meta: { guestOnly: true } },
+  { path: "/registrarse", redirect: "/registarse" },
   { path: "/confirmacion", component: EmailConfirmation },
   { path: "/perfil", component: Perfil, meta: { requiresAuth: true } },
   { path: "/chat", component: ChatGlobal, meta: { requiresAuth: true } },
@@ -24,19 +26,22 @@ const router = createRouter({
   routes,
 });
 
-// let user = {
-//   id: null,
-//   email: null,
-// };
+router.beforeEach(async (to) => {
+  let session = null;
 
-// subscribeToAuthUserChanges((userData) => (user = userData));
+  try {
+    session = await getSession();
+  } catch {
+    session = null;
+  }
 
-// router.beforeEach((to, from) => {
-//   // console.log('Navegación de ruta: ', to);
+  if (to.meta.requiresAuth && !session) {
+    return { path: "/inicio-sesion", query: { redirect: to.fullPath } };
+  }
 
-//   if (to.meta?.requiresAuth && user.id == null) {
-//     return "/inicio-sesion";
-//   }
-// });
+  if (to.meta.guestOnly && session) {
+    return "/chat";
+  }
+});
 
 export default router;
