@@ -1,0 +1,8 @@
+Carrera: Diseño y Desarrollo Web.
+Materia: Clientes Web Mobile.
+Año: 2026.
+Turno: Tarde.
+Comisión: AP.
+Apellido y nombre: Tito Valentín.
+Docente: Gallino Santiago.
+Carácter de entrega: 1er parcial.
