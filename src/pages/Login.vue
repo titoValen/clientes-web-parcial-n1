@@ -1,9 +1,10 @@
 <script setup>
 import { ref } from "vue";
-import { RouterLink, useRouter } from "vue-router";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 import { login } from "@/services/auth";
 
 const router = useRouter();
+const route = useRoute();
 const email = ref("");
 const password = ref("");
 const errorMessage = ref("");
@@ -18,7 +19,12 @@ async function handleSubmit() {
       email: email.value,
       password: password.value,
     });
-    await router.push("/chat");
+    const redirect = route.query.redirect;
+    const destination =
+      typeof redirect === "string" && redirect.startsWith("/") && !redirect.startsWith("//")
+        ? redirect
+        : "/chat";
+    await router.push(destination);
   } catch (error) {
     errorMessage.value =
       error?.message || "No pudimos iniciar sesión. Revisá tus datos.";
