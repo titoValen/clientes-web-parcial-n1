@@ -1,7 +1,9 @@
 <script setup>
 import { onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 
+const route = useRoute();
 const { user, isAuthReady, initAuth } = useAuth();
 
 onMounted(() => {
@@ -59,8 +61,9 @@ onMounted(() => {
     <div class="flex items-center gap-2 sm:gap-6">
       <RouterLink
         v-if="isAuthReady && user"
-        class="hidden text-[13px] font-medium text-muted no-underline transition-colors hover:text-text sm:inline"
+        class="text-[13px] font-medium text-muted no-underline transition-colors hover:text-text"
         to="/feed"
+        :aria-current="route.path === '/feed' ? 'page' : undefined"
       >
         Feed
       </RouterLink>
@@ -68,6 +71,7 @@ onMounted(() => {
         v-if="isAuthReady && user"
         class="inline-flex min-h-[37px] items-center justify-center rounded-[7px] border border-slate-400/25 px-4 text-xs font-semibold text-slate-200 no-underline transition duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:text-white sm:min-h-10"
         to="/chat"
+        :aria-current="route.path.startsWith('/chat') ? 'page' : undefined"
       >
         Chat
       </RouterLink>
@@ -75,6 +79,7 @@ onMounted(() => {
         v-if="isAuthReady && user"
         class="inline-flex min-h-[37px] items-center justify-center rounded-[7px] border border-transparent bg-primary px-5 text-xs font-semibold text-white no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_10px_30px_rgba(79,70,229,0.23)] sm:min-h-10"
         to="/perfil"
+        :aria-current="route.path === '/perfil' ? 'page' : undefined"
       >
         Perfil
       </RouterLink>
@@ -82,13 +87,14 @@ onMounted(() => {
         v-if="isAuthReady && !user"
         class="mr-0 hidden text-[13px] font-medium text-muted no-underline transition-colors hover:text-text sm:mr-1 sm:inline"
         to="/inicio-sesion"
+        :aria-current="route.path === '/inicio-sesion' ? 'page' : undefined"
       >
         Iniciar sesión
       </RouterLink>
       <RouterLink
         v-if="isAuthReady && !user"
         class="inline-flex min-h-[37px] items-center justify-center gap-3 rounded-[7px] border border-transparent bg-primary px-4 text-xs font-semibold text-white no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_10px_30px_rgba(79,70,229,0.23)] sm:min-h-10"
-        to="/registarse"
+        to="/registrarse"
       >
         Crear cuenta <span aria-hidden="true">↗</span>
       </RouterLink>
