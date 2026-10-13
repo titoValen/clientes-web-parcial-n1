@@ -87,6 +87,7 @@ async function handleSubmit() {
               name="displayName"
               placeholder="¿Cómo te conocen?"
               autocomplete="nickname"
+              :aria-describedby="errorMessage ? 'register-error' : undefined"
               required
             />
           </div>
@@ -103,6 +104,7 @@ async function handleSubmit() {
               name="email"
               placeholder="vos@ejemplo.com"
               autocomplete="email"
+              :aria-describedby="errorMessage ? 'register-error' : undefined"
               required
             />
           </div>
@@ -120,6 +122,7 @@ async function handleSubmit() {
               placeholder="Al menos 6 caracteres"
               autocomplete="new-password"
               minlength="6"
+              :aria-describedby="errorMessage ? 'register-error' : undefined"
               required
             />
           </div>
@@ -137,11 +140,12 @@ async function handleSubmit() {
               placeholder="Volvé a escribirla"
               autocomplete="new-password"
               minlength="6"
+              :aria-describedby="errorMessage ? 'register-error' : undefined"
               required
             />
           </div>
 
-          <p v-if="errorMessage" class="rounded-lg border border-danger/25 bg-danger/10 px-3 py-2 text-xs leading-5 text-red-200" role="alert">
+          <p v-if="errorMessage" id="register-error" class="rounded-lg border border-danger/25 bg-danger/10 px-3 py-2 text-xs leading-5 text-red-200" role="alert">
             {{ errorMessage }}
           </p>
           <p v-if="successMessage" class="rounded-lg border border-success/25 bg-success/10 px-3 py-2 text-xs leading-5 text-green-200" role="status">
