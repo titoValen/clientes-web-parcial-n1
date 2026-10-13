@@ -7,11 +7,17 @@ import {
   sendGlobalMessage,
   subscribeToGlobalMessages,
 } from "@/services/global-messages";
+import { searchProfilesByDisplayName } from "@/services/profiles";
 
 const router = useRouter();
 const currentUser = ref(null);
 const messages = ref([]);
 const messageContent = ref("");
+const profileSearch = ref("");
+const profileResults = ref([]);
+const isSearchingProfiles = ref(false);
+const hasSearchedProfiles = ref(false);
+const profileSearchError = ref("");
 const isLoading = ref(true);
 const isSending = ref(false);
 const isConnected = ref(false);
@@ -92,6 +98,28 @@ async function handleSubmit() {
   }
 }
 
+async function handleProfileSearch() {
+  const displayName = profileSearch.value.trim();
+  if (!displayName || isSearchingProfiles.value) return;
+
+  isSearchingProfiles.value = true;
+  hasSearchedProfiles.value = false;
+  profileSearchError.value = "";
+
+  try {
+    profileResults.value = await searchProfilesByDisplayName(
+      displayName,
+      currentUser.value.id,
+    );
+    hasSearchedProfiles.value = true;
+  } catch (error) {
+    profileSearchError.value =
+      error?.message || "No pudimos buscar perfiles en este momento.";
+  } finally {
+    isSearchingProfiles.value = false;
+  }
+}
+
 onMounted(loadChat);
 
 onUnmounted(() => {
@@ -129,6 +157,48 @@ onUnmounted(() => {
       <p v-if="errorMessage" class="mb-5 rounded-lg border border-danger/25 bg-danger/10 px-4 py-3 text-xs leading-5 text-red-200" role="alert">
         {{ errorMessage }}
       </p>
+
+      <section class="mb-6 border-y border-slate-400/15 py-5" aria-labelledby="profile-search-title">
+        <div class="mb-3">
+          <h2 id="profile-search-title" class="font-heading text-sm font-semibold">Iniciar chat privado</h2>
+          <p class="mt-1 text-xs text-muted">Buscá a alguien por su nombre de perfil.</p>
+        </div>
+        <form class="flex flex-col gap-2 sm:flex-row" @submit.prevent="handleProfileSearch">
+          <label class="sr-only" for="profile-search">Nombre de perfil</label>
+          <input
+            id="profile-search"
+            v-model="profileSearch"
+            class="min-h-11 min-w-0 flex-1 rounded-lg border border-slate-400/20 bg-slate-950/20 px-3 text-sm text-text outline-none placeholder:text-slate-500 focus:border-primary/60"
+            type="search"
+            placeholder="Buscar por el nombre"
+            autocomplete="off"
+          />
+          <button
+            class="min-h-11 cursor-pointer rounded-lg border border-primary/30 bg-primary/15 px-4 text-sm font-semibold text-[#c5c6ff] transition hover:bg-primary/25 disabled:cursor-wait disabled:opacity-60"
+            type="submit"
+            :disabled="isSearchingProfiles || !profileSearch.trim()"
+          >
+            {{ isSearchingProfiles ? "Buscando..." : "Buscar" }}
+          </button>
+        </form>
+        <p v-if="profileSearchError" class="mt-3 text-xs text-red-200" role="alert">{{ profileSearchError }}</p>
+        <p v-else-if="hasSearchedProfiles && !profileResults.length" class="mt-3 text-xs text-muted" role="status">No encontramos perfiles con ese nombre.</p>
+        <ul v-else-if="profileResults.length" class="mt-3 divide-y divide-slate-400/10 border-y border-slate-400/10">
+          <li v-for="profile in profileResults" :key="profile.id">
+            <RouterLink
+              class="flex min-h-14 items-center gap-3 py-2 transition hover:text-white"
+              :to="`/chat/${profile.id}`"
+            >
+              <span class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-400/20 bg-primary/20 text-xs font-semibold text-[#c5c6ff]">
+                <img v-if="profile.avatar_url" class="size-full object-cover" :src="profile.avatar_url" alt="" />
+                <span v-else>{{ profile.display_name.slice(0, 1).toUpperCase() }}</span>
+              </span>
+              <span class="min-w-0 flex-1 truncate text-sm font-medium text-slate-200">{{ profile.display_name }}</span>
+              <span class="text-xs font-semibold text-[#b5b6ff]">Enviar mensaje</span>
+            </RouterLink>
+          </li>
+        </ul>
+      </section>
 
       <section class="overflow-hidden rounded-2xl border border-slate-400/15 bg-[linear-gradient(145deg,rgba(30,41,59,0.92),rgba(22,33,52,0.92))] shadow-[0_28px_90px_rgba(0,0,0,0.28)]" aria-labelledby="global-chat-title">
         <div class="flex items-center justify-between border-b border-slate-400/15 px-5 py-4 sm:px-7">
