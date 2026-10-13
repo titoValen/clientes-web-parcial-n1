@@ -1,5 +1,13 @@
 <script setup>
+import { onMounted } from "vue";
 import { RouterLink } from "vue-router";
+import { useAuth } from "@/composables/useAuth";
+
+const { user, isAuthReady, initAuth } = useAuth();
+
+onMounted(() => {
+  initAuth();
+});
 
 const features = [
   {
@@ -61,10 +69,18 @@ const features = [
           </p>
           <div class="mt-[30px] flex items-center gap-[25px]">
             <RouterLink
+              v-if="isAuthReady && !user"
               class="inline-flex min-h-[52px] min-w-[174px] items-center justify-center gap-[19px] rounded-[9px] border border-transparent bg-primary px-[19px] text-[13px] font-semibold text-white no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_10px_30px_rgba(79,70,229,0.23)]"
               to="/registarse"
             >
               Empezar ahora <span aria-hidden="true">↗</span>
+            </RouterLink>
+            <RouterLink
+              v-else-if="isAuthReady && user"
+              class="inline-flex min-h-[52px] min-w-[174px] items-center justify-center gap-[19px] rounded-[9px] border border-transparent bg-primary px-[19px] text-[13px] font-semibold text-white no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_10px_30px_rgba(79,70,229,0.23)]"
+              to="/chat"
+            >
+              Ir al chat <span aria-hidden="true">↗</span>
             </RouterLink>
             <a
               class="inline-flex items-center gap-[9px] text-xs font-medium text-slate-300 no-underline"
@@ -262,10 +278,18 @@ const features = [
           </h2>
         </div>
         <RouterLink
+          v-if="isAuthReady && !user"
           class="relative z-[1] inline-flex min-h-[45px] w-fit items-center justify-center gap-4 rounded-[9px] border border-transparent bg-primary px-[17px] text-[13px] font-semibold text-white no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_10px_30px_rgba(79,70,229,0.23)]"
           to="/registarse"
         >
           Crear mi cuenta <span aria-hidden="true">↗</span>
+        </RouterLink>
+        <RouterLink
+          v-else-if="isAuthReady && user"
+          class="relative z-[1] inline-flex min-h-[45px] w-fit items-center justify-center gap-4 rounded-[9px] border border-transparent bg-primary px-[17px] text-[13px] font-semibold text-white no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_10px_30px_rgba(79,70,229,0.23)]"
+          to="/perfil"
+        >
+          Ver mi perfil <span aria-hidden="true">↗</span>
         </RouterLink>
         <span class="pointer-events-none absolute -right-[13px] -top-10 text-[160px] leading-none text-[#8183f5]/10 sm:right-[150px] sm:top-[-68px] sm:text-[210px]" aria-hidden="true">✳</span>
       </section>
