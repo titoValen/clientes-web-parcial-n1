@@ -5,12 +5,14 @@ import Register from "@/pages/Register.vue";
 import Perfil from "@/pages/Perfil.vue";
 import ChatGlobal from "@/pages/ChatGlobal.vue";
 import ChatIndividual from "@/pages/ChatIndividual.vue";
+import EmailConfirmation from "@/pages/EmailConfirmation.vue";
 import Error404 from "@/pages/Error404.vue";
 
 const routes = [
   { path: "/", component: Home },
   { path: "/inicio-sesion", component: Login },
   { path: "/registarse", component: Register },
+  { path: "/confirmacion", component: EmailConfirmation },
   { path: "/perfil", component: Perfil, meta: { requiresAuth: true } },
   { path: "/chat", component: ChatGlobal, meta: { requiresAuth: true } },
   { path: "/chat/:id", component: ChatIndividual, meta: { requiresAuth: true } },
