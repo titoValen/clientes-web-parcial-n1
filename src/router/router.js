@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "@/pages/Home.vue";
+import Feed from "@/pages/Feed.vue";
 import Login from "@/pages/Login.vue";
 import Register from "@/pages/Register.vue";
 import Perfil from "@/pages/Perfil.vue";
@@ -12,6 +13,7 @@ import { getSession } from "@/services/auth";
 
 const routes = [
   { path: "/", component: Home },
+  { path: "/feed", component: Feed, meta: { requiresAuth: true } },
   { path: "/inicio-sesion", component: Login, meta: { guestOnly: true } },
   { path: "/registarse", component: Register, meta: { guestOnly: true } },
   { path: "/registrarse", redirect: "/registarse" },
@@ -19,8 +21,8 @@ const routes = [
   { path: "/perfil", component: Perfil, meta: { requiresAuth: true } },
   { path: "/chat", component: ChatGlobal, meta: { requiresAuth: true } },
   { path: "/chat/:id", component: ChatIndividual, meta: { requiresAuth: true } },
-  { path: "/usuario/:id", component: PublicProfile },
-  { path: "/:pathMatch", component: Error404 },
+  { path: "/usuario/:id", component: PublicProfile, meta: { requiresAuth: true } },
+  { path: "/:pathMatch(.*)*", component: Error404 },
 ];
 
 const router = createRouter({
