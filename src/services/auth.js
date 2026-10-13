@@ -5,6 +5,7 @@ export async function register({ email, password, displayName }) {
     email,
     password,
     options: {
+      emailRedirectTo: `${window.location.origin}/confirmacion`,
       data: {
         display_name: displayName,
       },
