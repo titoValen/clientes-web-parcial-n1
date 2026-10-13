@@ -59,6 +59,13 @@ onMounted(() => {
     <div class="flex items-center gap-2 sm:gap-6">
       <RouterLink
         v-if="isAuthReady && user"
+        class="hidden text-[13px] font-medium text-muted no-underline transition-colors hover:text-text sm:inline"
+        to="/feed"
+      >
+        Feed
+      </RouterLink>
+      <RouterLink
+        v-if="isAuthReady && user"
         class="inline-flex min-h-[37px] items-center justify-center rounded-[7px] border border-slate-400/25 px-4 text-xs font-semibold text-slate-200 no-underline transition duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:text-white sm:min-h-10"
         to="/chat"
       >
