@@ -3,6 +3,7 @@ import { onMounted, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import { getCurrentUser } from "@/services/auth";
 import { getProfileById } from "@/services/profiles";
+import PostsFeed from "@/components/PostsFeed.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -70,6 +71,9 @@ onMounted(loadProfile);
           <RouterLink v-else-if="!currentUser" class="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-400/20 px-5 text-sm font-semibold text-slate-300 transition hover:border-primary/50 hover:text-white" to="/inicio-sesion">Iniciá sesión para enviar mensaje</RouterLink>
         </div>
       </section>
+      <div v-if="!isLoading && !errorMessage" class="mx-auto mt-6 max-w-2xl">
+        <PostsFeed :user-id="targetId" :can-publish="isOwnProfile" />
+      </div>
     </main>
   </div>
 </template>
