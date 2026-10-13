@@ -7,11 +7,15 @@ import {
   sendGlobalMessage,
   subscribeToGlobalMessages,
 } from "@/services/global-messages";
+import { getRecentPrivateConversations } from "@/services/private-messages";
 import { searchProfilesByDisplayName } from "@/services/profiles";
 
 const router = useRouter();
 const currentUser = ref(null);
 const messages = ref([]);
+const privateConversations = ref([]);
+const isLoadingPrivateConversations = ref(true);
+const privateConversationsError = ref("");
 const messageContent = ref("");
 const profileSearch = ref("");
 const profileResults = ref([]);
@@ -53,6 +57,16 @@ function formatTime(date) {
   }).format(new Date(date));
 }
 
+function formatConversationDate(date) {
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(date));
+}
+
 function isOwnMessage(message) {
   return message.user_id === currentUser.value?.id;
 }
@@ -66,7 +80,25 @@ async function loadChat() {
       return;
     }
 
-    messages.value = await getGlobalMessages(100);
+    const [globalMessagesResult, privateConversationsResult] =
+      await Promise.allSettled([
+        getGlobalMessages(100),
+        getRecentPrivateConversations(currentUser.value.id),
+      ]);
+
+    if (globalMessagesResult.status === "rejected") {
+      throw globalMessagesResult.reason;
+    }
+
+    messages.value = globalMessagesResult.value;
+    if (privateConversationsResult.status === "fulfilled") {
+      privateConversations.value = privateConversationsResult.value;
+    } else {
+      privateConversationsError.value =
+        privateConversationsResult.reason?.message ||
+        "No pudimos cargar tus conversaciones privadas.";
+    }
+    isLoadingPrivateConversations.value = false;
     scrollToLatest();
 
     messagesChannel = await subscribeToGlobalMessages((payload) => {
@@ -77,6 +109,7 @@ async function loadChat() {
   } catch (error) {
     errorMessage.value = error?.message || "No pudimos cargar el chat global.";
   } finally {
+    isLoadingPrivateConversations.value = false;
     isLoading.value = false;
   }
 }
@@ -195,6 +228,37 @@ onUnmounted(() => {
               </span>
               <span class="min-w-0 flex-1 truncate text-sm font-medium text-slate-200">{{ profile.display_name }}</span>
               <span class="text-xs font-semibold text-[#b5b6ff]">Enviar mensaje</span>
+            </RouterLink>
+          </li>
+        </ul>
+      </section>
+
+      <section class="mb-6 border-y border-slate-400/15 py-5" aria-labelledby="private-conversations-title">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <h2 id="private-conversations-title" class="font-heading text-sm font-semibold">Tus conversaciones recientes</h2>
+            <p class="mt-1 text-xs text-muted">Retomá un chat privado anterior.</p>
+          </div>
+          <span v-if="privateConversations.length" class="shrink-0 text-[10px] text-slate-500">{{ privateConversations.length }} chats</span>
+        </div>
+        <p v-if="isLoadingPrivateConversations" class="text-xs text-muted" role="status">Cargando conversaciones...</p>
+        <p v-else-if="privateConversationsError" class="text-xs text-red-200" role="alert">{{ privateConversationsError }}</p>
+        <p v-else-if="!privateConversations.length" class="text-xs text-muted">Todavía no tenés conversaciones privadas.</p>
+        <ul v-else class="divide-y divide-slate-400/10 border-y border-slate-400/10">
+          <li v-for="conversation in privateConversations" :key="conversation.partnerId">
+            <RouterLink
+              class="flex min-h-16 items-center gap-3 py-2 transition hover:bg-slate-400/5"
+              :to="`/chat/${conversation.partnerId}`"
+            >
+              <span class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-400/20 bg-primary/20 text-xs font-semibold text-[#c5c6ff]">
+                <img v-if="conversation.profile?.avatar_url" class="size-full object-cover" :src="conversation.profile.avatar_url" alt="" />
+                <span v-else>{{ (conversation.profile?.display_name || "U").slice(0, 1).toUpperCase() }}</span>
+              </span>
+              <span class="min-w-0 flex-1">
+                <strong class="block truncate text-sm font-medium text-slate-200">{{ conversation.profile?.display_name || "Usuario de la comunidad" }}</strong>
+                <span class="mt-1 block truncate text-xs text-muted">{{ conversation.content }}</span>
+              </span>
+              <time class="shrink-0 text-[10px] text-slate-500" :datetime="conversation.created_at">{{ formatConversationDate(conversation.created_at) }}</time>
             </RouterLink>
           </li>
         </ul>
