@@ -76,6 +76,7 @@ async function handleSubmit() {
               name="email"
               placeholder="vos@ejemplo.com"
               autocomplete="email"
+              :aria-describedby="errorMessage ? 'login-error' : undefined"
               required
             />
           </div>
@@ -94,11 +95,11 @@ async function handleSubmit() {
               name="password"
               placeholder="Tu contraseña"
               autocomplete="current-password"
-              required
+              :aria-describedby="errorMessage ? 'login-error' : undefined"
             />
           </div>
 
-          <p v-if="errorMessage" class="rounded-lg border border-danger/25 bg-danger/10 px-3 py-2 text-xs leading-5 text-red-200" role="alert">
+          <p v-if="errorMessage" id="login-error" class="rounded-lg border border-danger/25 bg-danger/10 px-3 py-2 text-xs leading-5 text-red-200" role="alert">
             {{ errorMessage }}
           </p>
 
@@ -114,7 +115,7 @@ async function handleSubmit() {
 
         <p class="mt-7 text-center text-xs text-muted">
           ¿Todavía no tenés una cuenta?
-          <RouterLink class="font-medium text-[#a5a6ff] no-underline hover:text-text" to="/registarse">
+          <RouterLink class="font-medium text-[#a5a6ff] no-underline hover:text-text" to="/registrarse">
             Creala acá
           </RouterLink>
         </p>
