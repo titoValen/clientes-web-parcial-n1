@@ -15,6 +15,45 @@ export async function getConversation(myId, otherId) {
   return data;
 }
 
+export async function getRecentPrivateConversations(userId, limit = 8) {
+  const { data: messages, error } = await supabase
+    .from("private_messages")
+    .select("id, sender_id, receiver_id, content, created_at")
+    .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+    .order("created_at", { ascending: false })
+    .limit(1000);
+
+  if (error) throw error;
+
+  const latestByPartner = new Map();
+  for (const message of messages) {
+    const partnerId =
+      message.sender_id === userId ? message.receiver_id : message.sender_id;
+
+    if (!latestByPartner.has(partnerId)) {
+      latestByPartner.set(partnerId, { ...message, partnerId });
+    }
+
+    if (latestByPartner.size >= limit) break;
+  }
+
+  const partnerIds = [...latestByPartner.keys()];
+  if (!partnerIds.length) return [];
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles")
+    .select("id, display_name, avatar_url")
+    .in("id", partnerIds);
+
+  if (profilesError) throw profilesError;
+
+  const profilesById = new Map(profiles.map((profile) => [profile.id, profile]));
+  return [...latestByPartner.values()].map((conversation) => ({
+    ...conversation,
+    profile: profilesById.get(conversation.partnerId),
+  }));
+}
+
 export async function sendPrivateMessage(receiverId, content) {
   const { data: sessionData, error: sessionError } =
     await supabase.auth.getSession();
