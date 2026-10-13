@@ -1,27 +1,11 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
-import { getSession, onAuthChange } from "@/services/auth";
+import { onMounted } from "vue";
+import { useAuth } from "@/composables/useAuth";
 
-const currentUser = ref(null);
-let authSubscription;
+const { user, isAuthReady, initAuth } = useAuth();
 
 onMounted(() => {
-  const { data } = onAuthChange((_event, session) => {
-    currentUser.value = session?.user ?? null;
-  });
-  authSubscription = data.subscription;
-
-  getSession()
-    .then((session) => {
-      currentUser.value = session?.user ?? null;
-    })
-    .catch(() => {
-      currentUser.value = null;
-    });
-});
-
-onUnmounted(() => {
-  authSubscription?.unsubscribe();
+  initAuth();
 });
 </script>
 
@@ -74,28 +58,28 @@ onUnmounted(() => {
 
     <div class="flex items-center gap-2 sm:gap-6">
       <RouterLink
-        v-if="currentUser"
+        v-if="isAuthReady && user"
         class="inline-flex min-h-[37px] items-center justify-center rounded-[7px] border border-slate-400/25 px-4 text-xs font-semibold text-slate-200 no-underline transition duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:text-white sm:min-h-10"
         to="/chat"
       >
         Chat
       </RouterLink>
       <RouterLink
-        v-if="currentUser"
+        v-if="isAuthReady && user"
         class="inline-flex min-h-[37px] items-center justify-center rounded-[7px] border border-transparent bg-primary px-5 text-xs font-semibold text-white no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_10px_30px_rgba(79,70,229,0.23)] sm:min-h-10"
         to="/perfil"
       >
         Perfil
       </RouterLink>
       <RouterLink
-        v-else
+        v-if="isAuthReady && !user"
         class="mr-0 hidden text-[13px] font-medium text-muted no-underline transition-colors hover:text-text sm:mr-1 sm:inline"
         to="/inicio-sesion"
       >
         Iniciar sesión
       </RouterLink>
       <RouterLink
-        v-if="!currentUser"
+        v-if="isAuthReady && !user"
         class="inline-flex min-h-[37px] items-center justify-center gap-3 rounded-[7px] border border-transparent bg-primary px-4 text-xs font-semibold text-white no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-[0_10px_30px_rgba(79,70,229,0.23)] sm:min-h-10"
         to="/registarse"
       >
