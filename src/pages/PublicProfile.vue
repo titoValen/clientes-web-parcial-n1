@@ -19,6 +19,9 @@ function getInitial() {
 }
 
 async function loadProfile() {
+  isLoading.value = true;
+  errorMessage.value = "";
+
   try {
     profile.value = await getProfileById(targetId);
 
@@ -34,6 +37,10 @@ async function loadProfile() {
   } finally {
     isLoading.value = false;
   }
+}
+
+function retryProfile() {
+  loadProfile();
 }
 
 onMounted(loadProfile);
@@ -54,7 +61,10 @@ onMounted(loadProfile);
       </div>
 
       <div v-if="isLoading" class="py-16 text-center text-sm text-muted">Cargando perfil...</div>
-      <p v-else-if="errorMessage" class="rounded-lg border border-danger/25 bg-danger/10 px-4 py-3 text-xs leading-5 text-red-200" role="alert">{{ errorMessage }}</p>
+      <div v-else-if="errorMessage" class="flex flex-col gap-3 rounded-lg border border-danger/25 bg-danger/10 px-4 py-3 text-xs leading-5 text-red-200 sm:flex-row sm:items-center sm:justify-between" role="alert">
+        <span><strong>No pudimos cargar este perfil.</strong> {{ errorMessage }}</span>
+        <button class="min-h-9 rounded-lg border border-red-300/30 px-3 font-semibold text-red-100 hover:bg-red-300/10" type="button" @click="retryProfile">Reintentar</button>
+      </div>
       <section v-else class="mx-auto max-w-2xl rounded-2xl border border-slate-400/15 bg-[linear-gradient(145deg,rgba(30,41,59,0.92),rgba(22,33,52,0.92))] p-6 shadow-[0_28px_90px_rgba(0,0,0,0.28)] sm:p-10" aria-labelledby="public-profile-title">
         <div class="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left">
           <div class="grid size-24 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-primary/40 bg-primary/20 font-heading text-3xl font-semibold text-[#c5c6ff]">
