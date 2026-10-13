@@ -67,3 +67,12 @@ export async function updateEmail(newEmail) {
   if (error) throw error;
   return data.user;
 }
+
+export async function deleteAccount() {
+  const { data, error } = await supabase.rpc("delete_user");
+
+  if (error) throw error;
+
+  await logout();
+  return data;
+}
